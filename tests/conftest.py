@@ -14,6 +14,11 @@ from alembic.command import upgrade
 from app.core.app import get_application
 from app.core.config import settings
 from app.core.db import close_db_connection, connect_to_db, make_alembic_config
+from app.roles.dto import Role
+
+from app.roles.enums import PermissionTypeEnum, ResourcesEnum
+from app.roles.tables import roles, permissions, permissions_in_roles
+from app.users.tables import users
 
 
 @dataclasses.dataclass()
@@ -83,3 +88,38 @@ def db(app: FastAPI) -> Database:
 @pytest.fixture
 def async_client(app):
     return AsyncClient(app=app, base_url=settings.BASE_API_URL)
+
+
+@pytest.fixture
+async def clean_db(db):
+    await db.execute(permissions_in_roles.delete())
+    await db.execute(permissions.delete())
+    await db.execute(users.delete())
+    await db.execute(roles.delete())
+
+
+@pytest.fixture
+def role_with_permissions_factory():
+    async def _generate_role_with_permissions(
+            db, permission_types: list[PermissionTypeEnum], resource: ResourcesEnum
+    ) -> Role:
+        query = roles.insert().values(
+            title='Test'
+        )
+        role_id = await db.execute(query)
+        raw_role = await db.fetch_one(roles.select().filter_by(id=role_id))
+
+        await db.execute_many(
+            query=permissions.insert(),
+            values=[{'type': type.value, 'resource': resource.value} for type in permission_types]
+        )
+        db_permissions = await db.fetch_all(query=permissions.select())
+
+        await db.execute_many(
+            query=permissions_in_roles.insert(),
+            values=[{'permission_id': permission['id'], 'role_id': role_id} for permission in db_permissions]
+        )
+
+        return Role(**raw_role)
+
+    return _generate_role_with_permissions
