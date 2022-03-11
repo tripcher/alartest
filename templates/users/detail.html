@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<script>
+async function fetch_user() {
+  const user_id = window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1)
+  const response = await fetch(`/api/v1/users/${user_id}`, {method:'get', headers: {Authorization: 'Bearer ' + localStorage.getItem('token')}},);
+  if (response.ok === false) {
+      let json = await response.json();
+      console.log(json)
+      alert("Ошибка HTTP: " + json.detail);
+  }
+  else {
+      const user = await response.json();
+      console.log(user)
+      createUserDetail(user)
+  }
+}
+
+function createUserDetail(user) {
+    const divDetail= document.createElement('div');
+    const usernameField = document.createElement('div');
+    usernameField.appendChild(document.createTextNode('username: ' + user['username']));
+    divDetail.appendChild(usernameField)
+
+    const roleField = document.createElement('div');
+    roleField.appendChild(document.createTextNode('role: ' + user['role_title']));
+    divDetail.appendChild(roleField)
+
+    const divUpdate = document.createElement('div');
+    const linkUpdate = document.createElement('a');
+    linkUpdate.appendChild(document.createTextNode('Редактировать'));
+    linkUpdate.title = 'Редактировать'
+    linkUpdate.href = `/users/update/${user.id}`
+    divUpdate.appendChild(linkUpdate)
+    divDetail.appendChild(divUpdate)
+
+    document.body.appendChild(divDetail);
+}
+
+window.onload = fetch_user;
+
+</script>
+<body>
+Информация о пользователе:
+</body>
+</html>

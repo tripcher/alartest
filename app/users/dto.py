@@ -18,6 +18,13 @@ class UserDetail(BaseDto):
     role_id: Optional[int] = None
 
 
+class UserFullDetail(BaseDto):
+    id: int
+    username: str
+    role_id: Optional[int] = None
+    role_title: Optional[str] = None
+
+
 class UserShort(BaseDto):
     id: int
     username: str
@@ -31,5 +38,4 @@ class CreateUserData(BaseDto):
 
 class UpdateUserData(BaseDto):
     username: str
-    password: str
     role_id: Optional[int] = None

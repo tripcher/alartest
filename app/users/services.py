@@ -24,14 +24,13 @@ async def create_user(*, db: Database, data: CreateUserData) -> UserDetail:
 async def update_user(
     *, db: Database, user_id: int, data: UpdateUserData
 ) -> UserDetail:
-    hashed_password = fake_hash_password(password=data.password)
     if data.role_id:
         await get_role_by_id(db=db, role_id=data.role_id)
 
     query = (
         users.update()
         .filter_by(id=user_id)
-        .values(username=data.username, password=hashed_password, role_id=data.role_id)
+        .values(username=data.username, role_id=data.role_id)
     )
     await db.execute(query)
 

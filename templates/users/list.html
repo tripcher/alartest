@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<script>
+async function fetch_users() {
+  const response = await fetch('/api/v1/users', {method:'get', headers: {Authorization: 'Bearer ' + localStorage.getItem('token')}},);
+  if (response.ok === false) {
+      let json = await response.json();
+      console.log(json)
+      alert("Ошибка HTTP: " + json.detail);
+  }
+  else {
+      const users = await response.json();
+      console.log(users)
+      createUserList(users)
+  }
+}
+
+function createUserList(users) {
+  const divList = document.createElement('div');
+  users.forEach(function(user) {
+    console.log('forEach', user)
+    const divRow = document.createElement('div');
+    const linkRow = document.createElement('a');
+    linkRow.appendChild(document.createTextNode(user.username));
+    linkRow.title = user.username
+    linkRow.href = `${window.location.origin}/users/${user.id}`
+    divRow.appendChild(linkRow)
+    divList.appendChild(divRow)
+  });
+  document.body.appendChild(divList);
+}
+
+window.onload = fetch_users;
+
+</script>
+<body>
+Список пользователей:
+</body>
+</html>

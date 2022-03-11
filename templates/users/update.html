@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<script>
+
+function getFormData(form){
+    return JSON.stringify(Object.fromEntries(new FormData(form)));
+}
+
+async function update(e, form) {
+  e.preventDefault();
+  const user_id = window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1)
+  const body = getFormData(form)
+  const response = await fetch(`/api/v1/users/${user_id}`, {method:'put', body: body, headers: {Authorization: 'Bearer ' + localStorage.getItem('token'), "Content-type": "application/json"}},);
+  if (response.ok === false) {
+      let json = await response.json();
+      alert("Ошибка HTTP: " + JSON.stringify(json));
+  }
+  else {
+      let json = await response.json();
+      window.location.replace(`/users/${user_id}`);
+  }
+}
+async function fetch_user() {
+  const user_id = window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1)
+  const response = await fetch(`/api/v1/users/${user_id}`, {method:'get', headers: {Authorization: 'Bearer ' + localStorage.getItem('token')}},);
+  if (response.ok === false) {
+      let json = await response.json();
+      console.log(json)
+      alert("Ошибка HTTP: " + JSON.stringify(json));
+  }
+  else {
+      const user = await response.json();
+      console.log(user)
+      createUserDetail(user)
+  }
+}
+
+function createUserDetail(user) {
+    const form = document.getElementsByTagName('form')[0];
+    const usernameLabel = document.createElement('p');
+    const usernameField = document.createElement('input');
+    usernameField.value = user['username']
+    usernameField.name = 'username'
+    usernameLabel.appendChild(document.createTextNode('username: '));
+    usernameLabel.appendChild(usernameField)
+    form.appendChild(usernameLabel)
+
+    const roleLabel = document.createElement('p');
+    const roleField = document.createElement('input');
+    roleField.value = user['role_id']
+    roleField.name = 'role_id'
+    roleLabel.appendChild(document.createTextNode('role id (' + user['role_title'] +'): ' ));
+    roleLabel.appendChild(roleField)
+    form.appendChild(roleLabel)
+
+    // const button = document.createElement('input');
+    // button.type = 'submit'
+    // form.appendChild(button)
+}
+
+window.onload = fetch_user;
+
+</script>
+<body>
+
+    Редактирование:
+    <form action="" onsubmit="update(event, this)">
+        <input type="submit">
+    </form>
+
+</body>
+</html>

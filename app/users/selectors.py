@@ -3,8 +3,9 @@ from __future__ import annotations
 from databases import Database
 
 from app.common.serializers import serialize_from_db, serialize_rows_from_db
-from app.users.dto import User, UserDetail, UserShort
+from app.users.dto import User, UserShort, UserFullDetail
 from app.users.tables import users
+from app.roles.selectors import get_role_by_id
 
 
 async def find_user_by_username(*, db: Database, username: str) -> User | None:
@@ -21,9 +22,17 @@ async def all_users_for_list_display(*, db: Database) -> list[UserShort]:
     return serialize_rows_from_db(rows=rows, model=UserShort)
 
 
-async def find_user_detail_by_id(*, db: Database, user_id: int) -> UserDetail | None:
+async def find_user_detail_by_id(*, db: Database, user_id: int) -> UserFullDetail | None:
     query = users.select().filter_by(id=user_id)
-    row = await db.fetch_one(query)
+    user = await db.fetch_one(query)
 
-    if row:
-        return serialize_from_db(row=row, model=UserDetail)
+    if not user:
+        return
+
+    role_id = user['role_id']
+    role_title = None
+    if role_id:
+        role = await get_role_by_id(db=db, role_id=role_id)
+        role_title = role.title
+
+    return UserFullDetail(**user, role_title=role_title)

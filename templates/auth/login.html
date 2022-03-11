@@ -6,17 +6,19 @@
 </head>
 <script>
 async function send(e,form) {
-  const response = await fetch('/api/v1/login', {method:'post', body: new FormData(form)});
+  e.preventDefault();
+  const body = new FormData(form)
+  const response = await fetch('/api/v1/login', {method:'post', body: body});
   if (response.ok === false) {
       let json = await response.json();
-      alert("Ошибка HTTP: " + json.detail);
+      console.log(json)
+      alert("Ошибка HTTP: " + JSON.stringify(json));
   }
   else {
       let json = await response.json();
       localStorage.setItem('token', json.access_token);
       window.location.replace("/docs");
   }
-  e.preventDefault();
 }
 
 </script>

@@ -7,7 +7,7 @@ from starlette import status
 from app.auth.services import api_check_permissions_on_resource
 from app.core.db import get_database
 from app.roles.enums import PermissionTypeEnum, ResourcesEnum
-from app.users.dto import CreateUserData, UpdateUserData, UserDetail, UserShort
+from app.users.dto import CreateUserData, UpdateUserData, UserDetail, UserShort, UserFullDetail
 from app.users.selectors import (all_users_for_list_display,
                                  find_user_detail_by_id)
 from app.users.services import create_user, delete_user_by_id, update_user
@@ -33,7 +33,7 @@ async def users_list(db: Database = Depends(get_database)) -> list[UserShort]:
 
 @router.get(
     "/users/{user_id}",
-    response_model=UserDetail,
+    response_model=UserFullDetail,
     status_code=status.HTTP_200_OK,
     dependencies=[
         Depends(
@@ -45,7 +45,7 @@ async def users_list(db: Database = Depends(get_database)) -> list[UserShort]:
 )
 async def users_detail(
     user_id: int, db: Database = Depends(get_database)
-) -> UserDetail:
+) -> UserFullDetail:
     user = await find_user_detail_by_id(db=db, user_id=user_id)
 
     if not user:
@@ -75,7 +75,7 @@ async def users_create(
 @router.put(
     "/users/{user_id}",
     response_model=UserDetail,
-    status_code=status.HTTP_201_CREATED,
+    status_code=status.HTTP_200_OK,
     dependencies=[
         Depends(
             api_check_permissions_on_resource(
