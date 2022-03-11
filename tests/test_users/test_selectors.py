@@ -3,7 +3,8 @@ from __future__ import annotations
 import pytest
 
 from app.users.dto import UserFullDetail
-from app.users.selectors import find_user_by_username, all_users_for_list_display, find_user_detail_by_id
+from app.users.selectors import (all_users_for_list_display,
+                                 find_user_by_username, find_user_detail_by_id)
 
 
 @pytest.mark.anyio
@@ -48,9 +49,7 @@ async def test__all_users_for_list_display__empty(db):
 async def test__all_users_for_list_display__amount(db, user_factory, number_of_users):
     # лень делать нормальные фабрики с bulk
     for number in range(number_of_users):
-        await user_factory(
-            username=f'test_{number}'
-        )
+        await user_factory(username=f"test_{number}")
 
     result = await all_users_for_list_display(db=db)
 
@@ -67,9 +66,7 @@ async def test__find_user_detail_by_id__none(db):
 
 @pytest.mark.anyio
 async def test__find_user_detail_by_id__not_none(db, user_factory):
-    user = await user_factory(
-        username=f'test'
-    )
+    user = await user_factory(username="test")
 
     result = await find_user_detail_by_id(db=db, user_id=user.id)
 
@@ -83,13 +80,8 @@ async def test__find_user_detail_by_id__not_none(db, user_factory):
 
 @pytest.mark.anyio
 async def test__find_user_detail_by_id__with_role(db, user_factory, role_factory):
-    role = await role_factory(
-        title='Test Role'
-    )
-    user = await user_factory(
-        username=f'test',
-        role_id=role.id
-    )
+    role = await role_factory(title="Test Role")
+    user = await user_factory(username="test", role_id=role.id)
 
     result = await find_user_detail_by_id(db=db, user_id=user.id)
 

@@ -16,9 +16,8 @@ from app.core.config import settings
 from app.core.db import close_db_connection, connect_to_db, make_alembic_config
 from app.health_check.tables import checks
 from app.roles.dto import Role
-
 from app.roles.enums import PermissionTypeEnum, ResourcesEnum
-from app.roles.tables import roles, permissions, permissions_in_roles
+from app.roles.tables import permissions, permissions_in_roles, roles
 from app.users.dto import User
 from app.users.tables import users
 
@@ -103,44 +102,55 @@ def async_client(app):
 
 # фабрики на минималках
 
+
 @pytest.fixture
 def user_factory(db):
-    async def _user_factory(username: str = 'test', password: str = 'test', role_id: int | None = None):
-        query = users.insert().values(username=username, password=password, role_id=role_id)
+    async def _user_factory(
+        username: str = "test", password: str = "test", role_id: int | None = None
+    ):
+        query = users.insert().values(
+            username=username, password=password, role_id=role_id
+        )
         record_id = await db.execute(query)
         return User(id=record_id, username=username, password=password, role_id=role_id)
+
     return _user_factory
 
 
 @pytest.fixture
 def role_factory(db):
-    async def _role_factory(title: str = 'test'):
+    async def _role_factory(title: str = "test"):
         query = roles.insert().values(title=title)
         record_id = await db.execute(query)
         return Role(id=record_id, title=title)
+
     return _role_factory
 
 
 @pytest.fixture
 def role_with_permissions_factory(db):
     async def _role_with_permissions(
-            permission_types: list[PermissionTypeEnum], resource: ResourcesEnum
+        permission_types: list[PermissionTypeEnum], resource: ResourcesEnum
     ) -> Role:
-        query = roles.insert().values(
-            title='Test'
-        )
+        query = roles.insert().values(title="Test")
         role_id = await db.execute(query)
         raw_role = await db.fetch_one(roles.select().filter_by(id=role_id))
 
         await db.execute_many(
             query=permissions.insert(),
-            values=[{'type': type.value, 'resource': resource.value} for type in permission_types]
+            values=[
+                {"type": type.value, "resource": resource.value}
+                for type in permission_types
+            ],
         )
         db_permissions = await db.fetch_all(query=permissions.select())
 
         await db.execute_many(
             query=permissions_in_roles.insert(),
-            values=[{'permission_id': permission['id'], 'role_id': role_id} for permission in db_permissions]
+            values=[
+                {"permission_id": permission["id"], "role_id": role_id}
+                for permission in db_permissions
+            ],
         )
 
         return Role(**raw_role)

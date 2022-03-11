@@ -5,11 +5,12 @@ from unittest import mock
 import pytest
 from databases import Database
 
-from app.auth.services import (fake_code_token_for_user, fake_decode_token,
-                               fake_hash_password, get_current_user, check_permissions_on_resource_by_user)
+from app.auth.services import (check_permissions_on_resource_by_user,
+                               fake_code_token_for_user, fake_decode_token,
+                               fake_hash_password, get_current_user)
 from app.core.exceptions import AuthorizationError, PermissionDeniedError
-from app.users.dto import User
 from app.roles.enums import PermissionTypeEnum, ResourcesEnum
+from app.users.dto import User
 
 
 @pytest.mark.parametrize(
@@ -100,94 +101,104 @@ async def test__get_current_user__error(mocker):
 
 
 @pytest.mark.parametrize(
-    ("permissions", "resource", 'user_permissions', 'user_resource'),
+    ("permissions", "resource", "user_permissions", "user_resource"),
     [
-        ([PermissionTypeEnum.update], ResourcesEnum.users, [PermissionTypeEnum.update], ResourcesEnum.users),
         (
-                [PermissionTypeEnum.update],
-                ResourcesEnum.users,
-                [PermissionTypeEnum.update, PermissionTypeEnum.delete, PermissionTypeEnum.view],
-                ResourcesEnum.users
+            [PermissionTypeEnum.update],
+            ResourcesEnum.users,
+            [PermissionTypeEnum.update],
+            ResourcesEnum.users,
         ),
         (
-                [PermissionTypeEnum.update, PermissionTypeEnum.delete, PermissionTypeEnum.view, PermissionTypeEnum.create],
-                ResourcesEnum.users,
-                [PermissionTypeEnum.update, PermissionTypeEnum.delete, PermissionTypeEnum.view, PermissionTypeEnum.create],
-                ResourcesEnum.users
-        )
+            [PermissionTypeEnum.update],
+            ResourcesEnum.users,
+            [
+                PermissionTypeEnum.update,
+                PermissionTypeEnum.delete,
+                PermissionTypeEnum.view,
+            ],
+            ResourcesEnum.users,
+        ),
+        (
+            [
+                PermissionTypeEnum.update,
+                PermissionTypeEnum.delete,
+                PermissionTypeEnum.view,
+                PermissionTypeEnum.create,
+            ],
+            ResourcesEnum.users,
+            [
+                PermissionTypeEnum.update,
+                PermissionTypeEnum.delete,
+                PermissionTypeEnum.view,
+                PermissionTypeEnum.create,
+            ],
+            ResourcesEnum.users,
+        ),
     ],
 )
 @pytest.mark.anyio
 async def test__check_permissions_on_resource_by_user__success(
-        db,
-        role_with_permissions_factory,
-        permissions,
-        resource,
-        user_permissions,
-        user_resource
+    db,
+    role_with_permissions_factory,
+    permissions,
+    resource,
+    user_permissions,
+    user_resource,
 ):
     role = await role_with_permissions_factory(
-        permission_types=user_permissions,
-        resource=user_resource
+        permission_types=user_permissions, resource=user_resource
     )
-    user = User(
-        id=1,
-        username='test',
-        password='test',
-        role_id=role.id
-    )
+    user = User(id=1, username="test", password="test", role_id=role.id)
 
     result = await check_permissions_on_resource_by_user(
-        db=db,
-        user=user,
-        permissions=permissions,
-        resource=resource
+        db=db, user=user, permissions=permissions, resource=resource
     )
 
     assert result is None
 
 
 @pytest.mark.parametrize(
-    ("permissions", "resource", 'user_permissions', 'user_resource'),
+    ("permissions", "resource", "user_permissions", "user_resource"),
     [
-        ([PermissionTypeEnum.update], ResourcesEnum.users, [PermissionTypeEnum.update], ResourcesEnum.checks),
         (
-                [PermissionTypeEnum.update, PermissionTypeEnum.delete, PermissionTypeEnum.view],
-                ResourcesEnum.users,
-                [PermissionTypeEnum.update],
-                ResourcesEnum.users
+            [PermissionTypeEnum.update],
+            ResourcesEnum.users,
+            [PermissionTypeEnum.update],
+            ResourcesEnum.checks,
         ),
         (
-                [PermissionTypeEnum.view],
-                ResourcesEnum.checks,
-                [PermissionTypeEnum.update],
-                ResourcesEnum.checks
+            [
+                PermissionTypeEnum.update,
+                PermissionTypeEnum.delete,
+                PermissionTypeEnum.view,
+            ],
+            ResourcesEnum.users,
+            [PermissionTypeEnum.update],
+            ResourcesEnum.users,
+        ),
+        (
+            [PermissionTypeEnum.view],
+            ResourcesEnum.checks,
+            [PermissionTypeEnum.update],
+            ResourcesEnum.checks,
         ),
     ],
 )
 @pytest.mark.anyio
 async def test__check_permissions_on_resource_by_user__error(
-        db,
-        role_with_permissions_factory,
-        permissions,
-        resource,
-        user_permissions,
-        user_resource
+    db,
+    role_with_permissions_factory,
+    permissions,
+    resource,
+    user_permissions,
+    user_resource,
 ):
     role = await role_with_permissions_factory(
-        permission_types=user_permissions,
-        resource=user_resource
+        permission_types=user_permissions, resource=user_resource
     )
-    user = User(
-        id=1,
-        username='test',
-        password='test',
-        role_id=role.id
-    )
+    user = User(id=1, username="test", password="test", role_id=role.id)
     with pytest.raises(PermissionDeniedError):
         await check_permissions_on_resource_by_user(
-            db=db,
-            user=user,
-            permissions=permissions,
-            resource=resource
+            db=db, user=user, permissions=permissions, resource=resource
         )
