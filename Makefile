@@ -8,6 +8,9 @@ format:
 style:
 	flake8 .
 
+test:
+	pytest .
+
 lint:
 	make format style types
 

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<script>
+async function send(e,form) {
+  const response = await fetch('/api/v1/login', {method:'post', body: new FormData(form)});
+  if (response.ok === false) {
+      let json = await response.json();
+      alert("Ошибка HTTP: " + json.detail);
+  }
+  else {
+      let json = await response.json();
+      localStorage.setItem('token', json.access_token);
+      window.location.replace("/docs");
+  }
+  e.preventDefault();
+}
+
+</script>
+<body>
+     <form action="" onsubmit="send(event, this)">
+          <p>Вход</p>
+          <p>
+              Логин: <input name="username">
+          </p>
+          <p>
+              Пароль:<input name="password">
+          </p>
+          <input type="submit">
+    </form>
+</body>
+</html>

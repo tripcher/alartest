@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import secrets
 from typing import Any, Dict, List, Optional, Union
 
@@ -7,6 +8,9 @@ from pydantic import AnyHttpUrl, BaseSettings, EmailStr, PostgresDsn, validator
 
 
 class Settings(BaseSettings):
+    BASE_DIR: str = os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    )
     API_V1_STR: str = "/api/v1"
     SECRET_KEY: str = secrets.token_urlsafe(32)
     # 60 minutes * 24 hours * 8 days = 8 days
@@ -16,9 +20,7 @@ class Settings(BaseSettings):
     BASE_API_URL: Optional[AnyHttpUrl] = None
 
     @validator("BASE_API_URL", pre=True)
-    def assemble_base_url(
-        cls, v: Optional[str], values: Dict[str, Any]
-    ) -> str:
+    def assemble_base_url(cls, v: Optional[str], values: Dict[str, Any]) -> str:
         return f'http://{values.get("SERVER_HOST", "")}:{values.get("SERVER_PORT", "")}{values.get("API_V1_STR", "")}'
 
     # BACKEND_CORS_ORIGINS is a JSON-formatted list of origins

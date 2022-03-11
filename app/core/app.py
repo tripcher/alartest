@@ -1,14 +1,21 @@
 from __future__ import annotations
 
+import os
 from typing import Callable
 
 from databases import Database
 from fastapi import FastAPI
+from starlette import status
 from starlette.middleware.cors import CORSMiddleware
+from starlette.requests import Request
+from starlette.responses import JSONResponse
+from starlette.staticfiles import StaticFiles
 
 from app.api.api_v1.api import api_router
 from app.core.config import settings
 from app.core.db import close_db_connection, connect_to_db
+from app.core.exceptions import AuthorizationError
+from app.web import web_router
 
 
 def create_start_app_handler(app: FastAPI) -> Callable:
@@ -23,6 +30,16 @@ def create_stop_app_handler(app: FastAPI) -> Callable:
         await close_db_connection(app)
 
     return stop_app
+
+
+async def authorization_error_handler(
+    request: Request, exc: AuthorizationError
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        content={"detail": "Invalid authentication credentials"},
+        headers={"WWW-Authenticate": "Bearer"},
+    )
 
 
 def get_application(db_uri: str | None = settings.DATABASE_URI) -> FastAPI:
@@ -46,9 +63,18 @@ def get_application(db_uri: str | None = settings.DATABASE_URI) -> FastAPI:
     database = Database(db_uri, min_size=2, max_size=10)
     app.state._db = database
 
+    app.mount(
+        "/static",
+        StaticFiles(directory=os.path.join(settings.BASE_DIR, "static")),
+        name="static",
+    )
+
     app.add_event_handler("startup", create_start_app_handler(app))
     app.add_event_handler("shutdown", create_stop_app_handler(app))
 
+    app.add_exception_handler(AuthorizationError, authorization_error_handler)
+
     app.include_router(api_router, prefix=settings.API_V1_STR)
+    app.include_router(web_router)
 
     return app

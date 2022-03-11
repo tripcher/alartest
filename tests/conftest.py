@@ -14,7 +14,6 @@ from alembic.command import upgrade
 from app.core.app import get_application
 from app.core.config import settings
 from app.core.db import close_db_connection, connect_to_db, make_alembic_config
-from app.core.config import settings
 
 
 @dataclasses.dataclass()
