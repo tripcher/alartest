@@ -1,4 +1,3 @@
-
 ## Install
 ```shell
 make isntall
@@ -8,6 +7,11 @@ make isntall
 ```shell
 uvicorn app.main:app --reload 
 ```
+
+## Login
+* url: http://127.0.0.1:8000/login
+* username: superuser
+* password: superuser
 
 ## Lint
 ```shell

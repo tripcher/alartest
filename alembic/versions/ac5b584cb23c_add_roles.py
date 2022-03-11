@@ -75,6 +75,7 @@ def upgrade():
         f"INSERT INTO permissions_in_roles (role_id, permission_id) VALUES {values}"
     )
     bind.execute(query_permissions)
+    session.flush()
 
 
 def downgrade():
@@ -94,3 +95,4 @@ def downgrade():
     super_role_id = super_role["id"]
     session.execute(permissions_in_roles.delete().filter_by(role_id=super_role_id))
     session.execute(roles.delete().filter_by(id=super_role_id))
+    session.flush()
