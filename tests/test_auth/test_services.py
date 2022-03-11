@@ -117,7 +117,6 @@ async def test__get_current_user__error(mocker):
         )
     ],
 )
-@pytest.mark.usefixtures('clean_db')
 @pytest.mark.anyio
 async def test__check_permissions_on_resource_by_user__success(
         db,
@@ -128,7 +127,6 @@ async def test__check_permissions_on_resource_by_user__success(
         user_resource
 ):
     role = await role_with_permissions_factory(
-        db=db,
         permission_types=user_permissions,
         resource=user_resource
     )
@@ -167,7 +165,6 @@ async def test__check_permissions_on_resource_by_user__success(
         ),
     ],
 )
-@pytest.mark.usefixtures('clean_db')
 @pytest.mark.anyio
 async def test__check_permissions_on_resource_by_user__error(
         db,
@@ -178,7 +175,6 @@ async def test__check_permissions_on_resource_by_user__error(
         user_resource
 ):
     role = await role_with_permissions_factory(
-        db=db,
         permission_types=user_permissions,
         resource=user_resource
     )

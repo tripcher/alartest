@@ -14,10 +14,12 @@ from alembic.command import upgrade
 from app.core.app import get_application
 from app.core.config import settings
 from app.core.db import close_db_connection, connect_to_db, make_alembic_config
+from app.health_check.tables import checks
 from app.roles.dto import Role
 
 from app.roles.enums import PermissionTypeEnum, ResourcesEnum
 from app.roles.tables import roles, permissions, permissions_in_roles
+from app.users.dto import User
 from app.users.tables import users
 
 
@@ -30,6 +32,15 @@ class TmpDatabaseUri:
 @pytest.fixture(autouse=True)
 def anyio_backend():
     return "asyncio"
+
+
+@pytest.fixture(autouse=True)
+async def clean_db(db):
+    await db.execute(permissions_in_roles.delete())
+    await db.execute(permissions.delete())
+    await db.execute(users.delete())
+    await db.execute(roles.delete())
+    await db.execute(checks.delete())
 
 
 @pytest.fixture
@@ -90,18 +101,30 @@ def async_client(app):
     return AsyncClient(app=app, base_url=settings.BASE_API_URL)
 
 
+# фабрики на минималках
+
 @pytest.fixture
-async def clean_db(db):
-    await db.execute(permissions_in_roles.delete())
-    await db.execute(permissions.delete())
-    await db.execute(users.delete())
-    await db.execute(roles.delete())
+def user_factory(db):
+    async def _user_factory(username: str = 'test', password: str = 'test', role_id: int | None = None):
+        query = users.insert().values(username=username, password=password, role_id=role_id)
+        record_id = await db.execute(query)
+        return User(id=record_id, username=username, password=password, role_id=role_id)
+    return _user_factory
 
 
 @pytest.fixture
-def role_with_permissions_factory():
-    async def _generate_role_with_permissions(
-            db, permission_types: list[PermissionTypeEnum], resource: ResourcesEnum
+def role_factory(db):
+    async def _role_factory(title: str = 'test'):
+        query = roles.insert().values(title=title)
+        record_id = await db.execute(query)
+        return Role(id=record_id, title=title)
+    return _role_factory
+
+
+@pytest.fixture
+def role_with_permissions_factory(db):
+    async def _role_with_permissions(
+            permission_types: list[PermissionTypeEnum], resource: ResourcesEnum
     ) -> Role:
         query = roles.insert().values(
             title='Test'
@@ -122,4 +145,4 @@ def role_with_permissions_factory():
 
         return Role(**raw_role)
 
-    return _generate_role_with_permissions
+    return _role_with_permissions
