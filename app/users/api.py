@@ -21,7 +21,9 @@ router = APIRouter()
     status_code=status.HTTP_200_OK,
     dependencies=[
         Depends(
-            api_check_permissions_on_resource(permissions=[PermissionTypeEnum.view], resource=ResourcesEnum.users)
+            api_check_permissions_on_resource(
+                permissions=[PermissionTypeEnum.view], resource=ResourcesEnum.users
+            )
         )
     ],
 )
@@ -35,7 +37,9 @@ async def users_list(db: Database = Depends(get_database)) -> list[UserShort]:
     status_code=status.HTTP_200_OK,
     dependencies=[
         Depends(
-            api_check_permissions_on_resource(permissions=[PermissionTypeEnum.view], resource=ResourcesEnum.users)
+            api_check_permissions_on_resource(
+                permissions=[PermissionTypeEnum.view], resource=ResourcesEnum.users
+            )
         )
     ],
 )
@@ -56,7 +60,9 @@ async def users_detail(
     status_code=status.HTTP_201_CREATED,
     dependencies=[
         Depends(
-            api_check_permissions_on_resource(permissions=[PermissionTypeEnum.create], resource=ResourcesEnum.users)
+            api_check_permissions_on_resource(
+                permissions=[PermissionTypeEnum.create], resource=ResourcesEnum.users
+            )
         )
     ],
 )
@@ -72,7 +78,9 @@ async def users_create(
     status_code=status.HTTP_201_CREATED,
     dependencies=[
         Depends(
-            api_check_permissions_on_resource(permissions=[PermissionTypeEnum.update], resource=ResourcesEnum.users)
+            api_check_permissions_on_resource(
+                permissions=[PermissionTypeEnum.update], resource=ResourcesEnum.users
+            )
         )
     ],
 )
@@ -87,7 +95,9 @@ async def users_update(
     status_code=status.HTTP_204_NO_CONTENT,
     dependencies=[
         Depends(
-            api_check_permissions_on_resource(permissions=[PermissionTypeEnum.delete], resource=ResourcesEnum.users)
+            api_check_permissions_on_resource(
+                permissions=[PermissionTypeEnum.delete], resource=ResourcesEnum.users
+            )
         )
     ],
 )

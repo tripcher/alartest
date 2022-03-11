@@ -14,7 +14,8 @@ from starlette.staticfiles import StaticFiles
 from app.api.api_v1.api import api_router
 from app.core.config import settings
 from app.core.db import close_db_connection, connect_to_db
-from app.core.exceptions import AuthorizationError, LogicError, PermissionDeniedError
+from app.core.exceptions import (AuthorizationError, LogicError,
+                                 PermissionDeniedError)
 from app.web import web_router
 
 

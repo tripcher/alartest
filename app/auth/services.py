@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from collections import Callable
+
 from databases import Database
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
@@ -7,10 +9,10 @@ from fastapi.security import OAuth2PasswordBearer
 from app.auth.dto import LoginData
 from app.core.db import get_database
 from app.core.exceptions import AuthorizationError, PermissionDeniedError
+from app.roles.enums import PermissionTypeEnum, ResourcesEnum
 from app.roles.selectors import permissions_on_resource_by_role
 from app.users.dto import User
 from app.users.selectors import find_user_by_username
-from app.roles.enums import ResourcesEnum, PermissionTypeEnum
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/login")
 
@@ -48,7 +50,11 @@ async def auth_login(*, db: Database, login_data: LoginData) -> str:
 
 
 async def check_permissions_on_resource_by_user(
-    *, db: Database, user: User, permissions: list[PermissionTypeEnum], resource: ResourcesEnum
+    *,
+    db: Database,
+    user: User,
+    permissions: list[PermissionTypeEnum],
+    resource: ResourcesEnum,
 ) -> None:
     role_id = user.role_id
 
@@ -56,9 +62,7 @@ async def check_permissions_on_resource_by_user(
         raise PermissionDeniedError()
 
     user_permissions = await permissions_on_resource_by_role(
-        db=db,
-        role_id=role_id,
-        resource=resource
+        db=db, role_id=role_id, resource=resource
     )
 
     required_permissions = [item.value for item in permissions]
@@ -79,15 +83,16 @@ async def get_current_user(
     return user
 
 
-def api_check_permissions_on_resource(*, permissions: list[PermissionTypeEnum], resource: ResourcesEnum):
+def api_check_permissions_on_resource(
+    *, permissions: list[PermissionTypeEnum], resource: ResourcesEnum
+) -> Callable:
     async def _api_check_permissions_on_resource(
-            current_user: User = Depends(get_current_user), db: Database = Depends(get_database)
-    ):
+        current_user: User = Depends(get_current_user),
+        db: Database = Depends(get_database),
+    ) -> User:
         await check_permissions_on_resource_by_user(
-            db=db,
-            user=current_user,
-            permissions=permissions,
-            resource=resource
+            db=db, user=current_user, permissions=permissions, resource=resource
         )
         return current_user
+
     return _api_check_permissions_on_resource

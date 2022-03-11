@@ -23,7 +23,9 @@ async def checks_list(db: Database = Depends(get_database)) -> list[HealthCheck]
     status_code=200,
     dependencies=[
         Depends(
-            api_check_permissions_on_resource(permissions=[PermissionTypeEnum.view], resource=ResourcesEnum.checks)
+            api_check_permissions_on_resource(
+                permissions=[PermissionTypeEnum.view], resource=ResourcesEnum.checks
+            )
         )
     ],
 )
