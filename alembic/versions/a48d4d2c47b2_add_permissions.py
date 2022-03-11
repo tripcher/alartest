@@ -5,19 +5,23 @@ Revises: e3a43f7e6f88
 Create Date: 2022-03-11 15:17:55.221912
 
 """
-from alembic import op
 import sqlalchemy as sa
-from app.roles.enums import ResourcesEnum, PermissionTypeEnum
+
+from alembic import op
+from app.roles.enums import PermissionTypeEnum, ResourcesEnum
 
 # revision identifiers, used by Alembic.
-revision = 'a48d4d2c47b2'
-down_revision = 'e3a43f7e6f88'
+revision = "a48d4d2c47b2"
+down_revision = "e3a43f7e6f88"
 branch_labels = None
 depends_on = None
 
 # перечисляем типы, что бы не зависеть от изменения PermissionTypeEnum (не учитывать новые добавленные)
 types = [
-    PermissionTypeEnum.update, PermissionTypeEnum.delete, PermissionTypeEnum.create, PermissionTypeEnum.view
+    PermissionTypeEnum.update,
+    PermissionTypeEnum.delete,
+    PermissionTypeEnum.create,
+    PermissionTypeEnum.view,
 ]
 
 
@@ -26,31 +30,31 @@ def generate_permission_values(resource: ResourcesEnum) -> str:
     for permission_type in types:
         values.append(f"('{permission_type.value}', '{resource.value}')")
 
-    return ', '.join(values)
+    return ", ".join(values)
 
 
 def upgrade():
-    values = ', '.join(
+    values = ", ".join(
         [
             generate_permission_values(ResourcesEnum.roles),
             generate_permission_values(ResourcesEnum.users),
             generate_permission_values(ResourcesEnum.checks),
-            generate_permission_values(ResourcesEnum.permissions)
+            generate_permission_values(ResourcesEnum.permissions),
         ]
     )
-    query = f'INSERT INTO permissions (type, resource) VALUES {values}'
+    query = f"INSERT INTO permissions (type, resource) VALUES {values}"
     op.execute(query)
 
 
 def downgrade():
-    str_types = ', '.join([f"'{type.value}'" for type in types])
+    str_types = ", ".join([f"'{type.value}'" for type in types])
     resources = [
         ResourcesEnum.roles,
         ResourcesEnum.users,
         ResourcesEnum.checks,
-        ResourcesEnum.permissions
+        ResourcesEnum.permissions,
     ]
-    str_resources = ', '.join([f"'{resource.value}'" for resource in resources])
+    str_resources = ", ".join([f"'{resource.value}'" for resource in resources])
 
-    query = f'DELETE FROM permissions WHERE type IN ({str_types}) and resource in ({str_resources})'
+    query = f"DELETE FROM permissions WHERE type IN ({str_types}) and resource in ({str_resources})"
     op.execute(query)

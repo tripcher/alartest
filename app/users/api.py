@@ -5,9 +5,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from starlette import status
 
 from app.core.db import get_database
-from app.users.dto import UserShort, UserDetail, CreateUserData, UpdateUserData
-from app.users.selectors import all_users_for_list_display, find_user_detail_by_id
-from app.users.services import delete_user_by_id, create_user, update_user
+from app.users.dto import CreateUserData, UpdateUserData, UserDetail, UserShort
+from app.users.selectors import (all_users_for_list_display,
+                                 find_user_detail_by_id)
+from app.users.services import create_user, delete_user_by_id, update_user
 
 router = APIRouter()
 
@@ -17,26 +18,33 @@ async def users_list(db: Database = Depends(get_database)) -> list[UserShort]:
     return await all_users_for_list_display(db=db)
 
 
-@router.get("/users/{user_id}", response_model=UserDetail, status_code=status.HTTP_200_OK)
-async def users_detail(user_id: int, db: Database = Depends(get_database)) -> UserDetail:
+@router.get(
+    "/users/{user_id}", response_model=UserDetail, status_code=status.HTTP_200_OK
+)
+async def users_detail(
+    user_id: int, db: Database = Depends(get_database)
+) -> UserDetail:
     user = await find_user_detail_by_id(db=db, user_id=user_id)
 
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail='Not found'
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
 
     return user
 
 
 @router.post("/users", response_model=UserDetail, status_code=status.HTTP_201_CREATED)
-async def users_create(data: CreateUserData, db: Database = Depends(get_database)) -> UserDetail:
+async def users_create(
+    data: CreateUserData, db: Database = Depends(get_database)
+) -> UserDetail:
     return await create_user(db=db, data=data)
 
 
-@router.put("/users/{user_id}", response_model=UserDetail, status_code=status.HTTP_201_CREATED)
-async def users_update(user_id: int, data: UpdateUserData, db: Database = Depends(get_database)) -> UserDetail:
+@router.put(
+    "/users/{user_id}", response_model=UserDetail, status_code=status.HTTP_201_CREATED
+)
+async def users_update(
+    user_id: int, data: UpdateUserData, db: Database = Depends(get_database)
+) -> UserDetail:
     return await update_user(db=db, user_id=user_id, data=data)
 
 

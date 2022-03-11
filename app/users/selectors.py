@@ -3,7 +3,7 @@ from __future__ import annotations
 from databases import Database
 
 from app.common.serializers import serialize_from_db, serialize_rows_from_db
-from app.users.dto import User, UserShort, UserDetail
+from app.users.dto import User, UserDetail, UserShort
 from app.users.tables import users
 
 

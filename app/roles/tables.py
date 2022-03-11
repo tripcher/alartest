@@ -3,7 +3,7 @@ from __future__ import annotations
 import sqlalchemy
 
 from app.core.db import metadata
-from app.roles.enums import ResourcesEnum, PermissionTypeEnum
+from app.roles.enums import PermissionTypeEnum, ResourcesEnum
 
 roles = sqlalchemy.Table(
     "roles",
@@ -24,6 +24,8 @@ permissions_in_roles = sqlalchemy.Table(
     "permissions_in_roles",
     metadata,
     sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True, autoincrement=True),
-    sqlalchemy.Column("role_id", sqlalchemy.Integer, sqlalchemy.ForeignKey('roles.id')),
-    sqlalchemy.Column("permission_id", sqlalchemy.Integer, sqlalchemy.ForeignKey('permissions.id')),
+    sqlalchemy.Column("role_id", sqlalchemy.Integer, sqlalchemy.ForeignKey("roles.id")),
+    sqlalchemy.Column(
+        "permission_id", sqlalchemy.Integer, sqlalchemy.ForeignKey("permissions.id")
+    ),
 )
