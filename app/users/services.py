@@ -11,7 +11,8 @@ async def create_user(*, db: Database, data: CreateUserData) -> UserDetail:
     hashed_password = fake_hash_password(password=data.password)
     query = users.insert().values(
         username=data.username,
-        password=hashed_password
+        password=hashed_password,
+        role_id=data.role_id
     )
 
     user_id = await db.execute(query)
@@ -27,7 +28,8 @@ async def update_user(*, db: Database, user_id: int, data: UpdateUserData) -> Us
     hashed_password = fake_hash_password(password=data.password)
     query = users.update().filter_by(id=user_id).values(
         username=data.username,
-        password=hashed_password
+        password=hashed_password,
+        role_id=data.role_id
     )
 
     await db.execute(query)

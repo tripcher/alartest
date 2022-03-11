@@ -6,6 +6,8 @@ from alembic import context
 from app.core.db import metadata
 from app.health_check import tables as health_check_tables
 from app.users import tables as users_tables
+from app.roles import tables as roles_tables
+
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
