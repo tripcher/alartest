@@ -4,6 +4,11 @@
 make isntall
 ```
 
+## Start
+```shell
+uvicorn app.main:app --reload 
+```
+
 ## Lint
 ```shell
 make lint

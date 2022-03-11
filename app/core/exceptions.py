@@ -7,3 +7,7 @@ class AppError(Exception):
 
 class AuthorizationError(AppError):
     pass
+
+
+class LogicError(AppError):
+    pass
