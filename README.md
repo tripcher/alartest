@@ -4,11 +4,6 @@
 make isntall
 ```
 
-## Install dev
-```shell
-make isntall-dev
-```
-
 ## Lint
 ```shell
 make lint
@@ -16,7 +11,10 @@ make lint
 
 ## Create migration
 ```shell
-alembic revision --autogenerate -m "Comment"
+export PYTHONPATH=.
 
-alembic upgrade head
+python3 scripts/migrate.py revision --autogenerate -m "Comment"
+
+python3 scripts/migrate.py upgrade head
+
 ```

@@ -1,12 +1,9 @@
-from __future__ import annotations
-
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config, pool
 
 from alembic import context
-from app.core import config as app_config
-from app.core import db
+from app.core.db import metadata
 from app.health_check import tables as health_check_tables
 
 # this is the Alembic Config object, which provides
@@ -21,11 +18,11 @@ fileConfig(config.config_file_name)
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = [db.metadata]
+target_metadata = metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
-# my_important_option = config.get_main_op tion("my_important_option")
+# my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 
 
@@ -41,7 +38,7 @@ def run_migrations_offline():
     script output.
 
     """
-    url = app_config.settings.SQLALCHEMY_DATABASE_URI
+    url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -60,12 +57,8 @@ def run_migrations_online():
     and associate a connection with the context.
 
     """
-
-    configuration = config.get_section(config.config_ini_section)
-    configuration["sqlalchemy.url"] = app_config.settings.SQLALCHEMY_DATABASE_URI
-
     connectable = engine_from_config(
-        configuration,
+        config.get_section(config.config_ini_section),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )

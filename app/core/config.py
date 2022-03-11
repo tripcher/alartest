@@ -13,6 +13,14 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
     SERVER_HOST: AnyHttpUrl = "http://127.0.0.1"
     SERVER_PORT: int = 8000
+    BASE_API_URL: Optional[str] = None
+
+    @validator("BASE_API_URL", pre=True)
+    def assemble_base_url(
+        cls, v: Optional[str], values: Dict[str, Any]
+    ) -> str:
+        return f'{values.get("SERVER_HOST", "")}:{values.get("SERVER_PORT", "")}{values.get("API_V1_STR", "")}'
+
     # BACKEND_CORS_ORIGINS is a JSON-formatted list of origins
     # e.g: '['http://localhost', 'http://localhost:4200', 'http://localhost:3000', \
     # 'http://localhost:8080', 'http://local.dockertoolbox.tiangolo.com']'
