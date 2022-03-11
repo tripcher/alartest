@@ -1,9 +1,35 @@
+## About
+Uses paradigms from  HackSoft guid https://github.com/HackSoftware/Django-Styleguide
+
+##Run
+* install
+* create database
+* create migration
+* run server
+
 ## Install
 ```shell
 make isntall
 ```
 
-## Start
+## Create database
+```sql
+create database alartest;
+create user alartest with encrypted password 'alartest';
+grant all privileges on database alartest to alartest;
+```
+
+## Create migration
+```shell
+export PYTHONPATH=.
+
+python3 scripts/migrate.py revision --autogenerate -m "Comment"
+
+python3 scripts/migrate.py upgrade head
+
+```
+
+## Run server
 ```shell
 uvicorn app.main:app --reload 
 ```
@@ -18,12 +44,7 @@ uvicorn app.main:app --reload
 make lint
 ```
 
-## Create migration
+## Test
 ```shell
-export PYTHONPATH=.
-
-python3 scripts/migrate.py revision --autogenerate -m "Comment"
-
-python3 scripts/migrate.py upgrade head
-
+make test
 ```
