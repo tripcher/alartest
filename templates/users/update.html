@@ -56,10 +56,6 @@ function createUserDetail(user) {
     roleLabel.appendChild(document.createTextNode('role id (' + user['role_title'] +'): ' ));
     roleLabel.appendChild(roleField)
     form.appendChild(roleLabel)
-
-    // const button = document.createElement('input');
-    // button.type = 'submit'
-    // form.appendChild(button)
 }
 
 window.onload = fetch_user;

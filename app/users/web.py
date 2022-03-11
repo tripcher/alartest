@@ -21,7 +21,7 @@ async def users_list(request: Request) -> HTMLResponse:
     "/users/{user_id}",
     response_class=HTMLResponse,
 )
-async def users_list(request: Request, user_id: int) -> HTMLResponse:
+async def users_detail(request: Request, user_id: int) -> HTMLResponse:
     return templates.TemplateResponse("users/detail.html", context={"request": request})
 
 

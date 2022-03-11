@@ -7,7 +7,8 @@ from starlette import status
 from app.auth.services import api_check_permissions_on_resource
 from app.core.db import get_database
 from app.roles.enums import PermissionTypeEnum, ResourcesEnum
-from app.users.dto import CreateUserData, UpdateUserData, UserDetail, UserShort, UserFullDetail
+from app.users.dto import (CreateUserData, UpdateUserData, UserDetail,
+                           UserFullDetail, UserShort)
 from app.users.selectors import (all_users_for_list_display,
                                  find_user_detail_by_id)
 from app.users.services import create_user, delete_user_by_id, update_user
