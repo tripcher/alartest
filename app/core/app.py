@@ -14,7 +14,7 @@ from starlette.staticfiles import StaticFiles
 from app.api.api_v1.api import api_router
 from app.core.config import settings
 from app.core.db import close_db_connection, connect_to_db
-from app.core.exceptions import AuthorizationError, LogicError
+from app.core.exceptions import AuthorizationError, LogicError, PermissionDeniedError
 from app.web import web_router
 
 
@@ -37,8 +37,17 @@ async def authorization_error_handler(
 ) -> JSONResponse:
     return JSONResponse(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        content={"detail": "Invalid authentication credentials"},
+        content={"detail": "Invalid authentication credentials."},
         headers={"WWW-Authenticate": "Bearer"},
+    )
+
+
+async def permission_error_handler(
+    request: Request, exc: PermissionDeniedError
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_403_FORBIDDEN,
+        content={"detail": "Permission denied."},
     )
 
 
@@ -81,6 +90,7 @@ def get_application(db_uri: str | None = settings.DATABASE_URI) -> FastAPI:
 
     app.add_exception_handler(AuthorizationError, authorization_error_handler)
     app.add_exception_handler(LogicError, logic_error_handler)
+    app.add_exception_handler(PermissionDeniedError, permission_error_handler)
 
     app.include_router(api_router, prefix=settings.API_V1_STR)
     app.include_router(web_router)

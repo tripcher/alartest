@@ -11,3 +11,7 @@ class AuthorizationError(AppError):
 
 class LogicError(AppError):
     pass
+
+
+class PermissionDeniedError(AppError):
+    pass
