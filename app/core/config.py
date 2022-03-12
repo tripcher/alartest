@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 import os
-import secrets
 from typing import Any, Dict, List, Optional, Union
 
-from pydantic import AnyHttpUrl, BaseSettings, EmailStr, PostgresDsn, validator
+from pydantic import AnyHttpUrl, BaseSettings, PostgresDsn, validator
 
 
 class Settings(BaseSettings):
@@ -12,9 +11,6 @@ class Settings(BaseSettings):
         os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     )
     API_V1_STR: str = "/api/v1"
-    SECRET_KEY: str = secrets.token_urlsafe(32)
-    # 60 minutes * 24 hours * 8 days = 8 days
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
     SERVER_HOST: str = "127.0.0.1"
     SERVER_PORT: int = 8000
     BASE_API_URL: Optional[AnyHttpUrl] = None
@@ -70,10 +66,6 @@ class Settings(BaseSettings):
             host=values.get("POSTGRES_SERVER"),
             path=f'/{values.get("POSTGRES_DB") or ""}',
         )
-
-    FIRST_SUPERUSER: EmailStr = "alartest@example.ru"
-    FIRST_SUPERUSER_PASSWORD: str = "alartest"
-    USERS_OPEN_REGISTRATION: bool = False
 
     class Config:
         case_sensitive = True
