@@ -1,5 +1,24 @@
 ## About
-Uses paradigms from  HackSoft guid https://github.com/HackSoftware/Django-Styleguide
+Используются подходы из HackSoft https://github.com/HackSoftware/Django-Styleguide
+
+###Структура проекта:
+auth - логика авторизации
+
+users, roles - пользователи, пермишены и роли
+
+sharding - вторая часть задания
+
+###Структура приложений:
+selectors - логика (в том числебизнесовая) получения данных
+
+services - основная бизнес логика приложения
+
+dto - классический паттерн DTO, модели и схемы не используются так как слишком простой проект
+
+api - http ручки
+
+web - web странницы на шаблонах (фронт ОЧЕНЬ кривой)
+
 
 ##Run
 * install
@@ -18,6 +37,10 @@ create database alartest;
 create user alartest with encrypted password 'alartest';
 grant all privileges on database alartest to alartest;
 ```
+For run tests:
+```sql
+alter user alartest createdb createrole;
+```
 
 ## Create migration
 ```shell
@@ -26,7 +49,6 @@ export PYTHONPATH=.
 python3 scripts/migrate.py revision --autogenerate -m "Comment"
 
 python3 scripts/migrate.py upgrade head
-
 ```
 
 ## Run server
