@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections import Callable
+from typing import Callable
 
 from databases import Database
 from fastapi import Depends
