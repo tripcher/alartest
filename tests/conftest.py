@@ -11,6 +11,7 @@ from httpx import AsyncClient
 from sqlalchemy_utils import create_database, drop_database
 
 from alembic.command import upgrade
+from app.auth.services import fake_code_token_for_user
 from app.core.app import get_application
 from app.core.config import settings
 from app.core.db import close_db_connection, connect_to_db, make_alembic_config
@@ -100,6 +101,19 @@ def async_client(app):
     return AsyncClient(app=app, base_url=settings.BASE_API_URL)
 
 
+@pytest.fixture
+def async_client_for_user(app):
+    async def _async_client_for_user(user):
+        token = fake_code_token_for_user(user=user)
+        return AsyncClient(
+            app=app,
+            base_url=settings.BASE_API_URL,
+            headers={"Authorization": f"Bearer {token}"},
+        )
+
+    return _async_client_for_user
+
+
 # фабрики на минималках
 
 
@@ -107,7 +121,7 @@ def async_client(app):
 def user_factory(db):
     async def _user_factory(
         username: str = "test", password: str = "test", role_id: int | None = None
-    ):
+    ) -> User:
         query = users.insert().values(
             username=username, password=password, role_id=role_id
         )
@@ -119,7 +133,7 @@ def user_factory(db):
 
 @pytest.fixture
 def role_factory(db):
-    async def _role_factory(title: str = "test"):
+    async def _role_factory(title: str = "test") -> Role:
         query = roles.insert().values(title=title)
         record_id = await db.execute(query)
         return Role(id=record_id, title=title)
@@ -156,3 +170,20 @@ def role_with_permissions_factory(db):
         return Role(**raw_role)
 
     return _role_with_permissions
+
+
+@pytest.fixture
+def user_with_permissions_factory(db, user_factory, role_with_permissions_factory):
+    async def _user_with_permissions_factory(
+        permission_types: list[PermissionTypeEnum],
+        resource: ResourcesEnum,
+        username: str = "test",
+        password: str = "test",
+    ) -> User:
+        role = await role_with_permissions_factory(
+            permission_types=permission_types, resource=resource
+        )
+        user = await user_factory(username=username, password=password, role_id=role.id)
+        return user
+
+    return _user_with_permissions_factory
